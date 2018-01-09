@@ -153,8 +153,16 @@ func (port *Port) IsConnectedToPort(other Port) bool {
     return port.IsConnectedToChannel(other.Port)
 }
 
+// Update the port's properties in place
+func (port *Port) Update() {
+    *port = port.target.GetPort(port.IsInput, port.Port)
+}
+
 // Set the volume of port
-func (port *Port) SetVol(vol float32) { port.target.VolumeSet(port.IsInput, port.Port, vol) }
+func (port *Port) SetVol(vol float32) {
+    port.target.VolumeSet(port.IsInput, port.Port, vol)
+    port.Update()
+}
 
 // Connect port with channel (other port name)
 func (port *Port) ConnectToChannel(channel string) {
@@ -200,6 +208,7 @@ func (port *Port) ToggleConnectionWithPort(other Port) {
 
 func (port *Port) SetMonitored() {
     port.target.SetMonitor(port.IsInput, port.Port)
+    port.Update()
 }
 
 // ==== Get Channels ====
