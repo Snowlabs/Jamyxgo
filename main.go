@@ -95,6 +95,21 @@ func (target *Target) VolumeInputSet(input string, volume float32) { target.Volu
 // Set volume for specified output channel.
 func (target *Target) VolumeOutputSet(output string, volume float32) { target.VolumeSet(false, output, volume) }
 
+// ==== Set Balance ====
+
+// Set balance for specified input/output channel.
+func (target *Target) BalanceSet(isinput bool, channel string, balance float32) {
+    // target.SendCommand("v%ss \"%s\" %f\n", getTargetType(isinput), channel, balance)
+    target.SendCommand(Command {
+        Target: "myx",
+        Cmd: "set",
+        Opts: []string{"b", getTargetType(isinput), channel, fmt.Sprintf("%f", balance)}})
+}
+// Set balance for specified input channel.
+func (target *Target) BalanceInputSet(input string, balance float32) { target.BalanceSet(true, input, balance) }
+// Set balance for specified output channel.
+func (target *Target) BalanceOutputSet(output string, balance float32) { target.BalanceSet(false, output, balance) }
+
 // ==== Get Port ====
 
 // Port object that holds all port info
@@ -164,6 +179,12 @@ func (port *Port) SetVol(vol float32) {
     port.Update()
 }
 
+// Set the balance of port
+func (port *Port) SetBal(vol float32) {
+    port.target.BalanceSet(port.IsInput, port.Port, vol)
+    port.Update()
+}
+
 // Connect port with channel (other port name)
 func (port *Port) ConnectToChannel(channel string) {
     if port.IsInput {
@@ -171,11 +192,14 @@ func (port *Port) ConnectToChannel(channel string) {
     } else {
         port.target.ConnectIO(channel, port.Port)
     }
+    port.Update()
 }
 
 // Connect two ports together
 func (port *Port) ConnectToPort(other Port) {
     port.ConnectToChannel(other.Port)
+    port.Update()
+    other.Update() // might not do anything here since other is passed by value
 }
 
 // Disconnect port from channel (other port name)
