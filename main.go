@@ -191,6 +191,11 @@ func (port* Port) ListenVol() {
     *port = port.target.VolumeListen(port.IsInput, port.Port)
 }
 
+// Wait for balance of port to change and then return bal
+func (port* Port) ListenBal() {
+    *port = port.target.BalanceListen(port.IsInput, port.Port)
+}
+
 // Connect port with channel (other port name)
 func (port *Port) ConnectToChannel(channel string) {
     if port.IsInput {
@@ -317,3 +322,18 @@ func (target *Target) VolumeInputListen(input string) Port { return target.Volum
 // Listen for volume for specified output channel.
 // This is a blocking call waiting for a change in volume and returning it.
 func (target *Target) VolumeOutputListen(output string) Port { return target.VolumeListen(false, output) }
+
+// Listen for balance change for specified channel.
+// This is a blocking call waiting for a change in balance and returning it.
+func (target *Target) BalanceListen(isinput bool, channel string) Port {
+    reply := target.SendCommand(Command {Target: "myx", Cmd: "mon", Opts: []string{"bal", getTargetType(isinput), channel}})
+    var port Port = target.GetPortFromReply(reply.(map[string]interface{}))
+
+    return port
+}
+// Listen for balance for specified input channel.
+// This is a blocking call waiting for a change in balance and returning it.
+func (target *Target) BalanceInputListen(input string) Port { return target.BalanceListen(true, input) }
+// Listen for balance for specified output channel.
+// This is a blocking call waiting for a change in balance and returning it.
+func (target *Target) BalanceOutputListen(output string) Port { return target.BalanceListen(false, output) }
