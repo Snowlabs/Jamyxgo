@@ -39,7 +39,7 @@ func (target* Target) SendCommand(cmd Command) (reply interface {}) {
     conn := target.GetConnection()
     cmd_b, _ := json.Marshal(cmd)
 
-    // log.Println("Sending command:", cmd_b)
+    log.Println("Sending command:", string(cmd_b))
 
     _, err := conn.Write(cmd_b)
     if err != nil {
@@ -60,7 +60,8 @@ func (target* Target) SendCommand(cmd Command) (reply interface {}) {
     if err != nil {
 		fmt.Println("error:", err)
 	}
-    log.Println(string(reply_b[:numbytes]), r)
+    log.Println("Reply:", string(reply_b[:numbytes]), r)
+    log.Print("\n\n--\n\n")
     return r
 }
 
