@@ -185,6 +185,11 @@ func (port *Port) SetBal(vol float32) {
     port.Update()
 }
 
+// Wait for volume of port to change and then return vol
+func (port* Port) ListenVol() {
+    *port = port.target.VolumeListen(port.IsInput, port.Port)
+}
+
 // Connect port with channel (other port name)
 func (port *Port) ConnectToChannel(channel string) {
     if port.IsInput {
